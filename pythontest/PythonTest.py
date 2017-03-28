@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 """
-:todo: docstring
+Automate making system calls and processing log files
 """
 
 import argparse
@@ -18,7 +18,7 @@ import sys
 import time
 from socket import getfqdn
 
-__version__ = '0.0.01'
+__version__ = '0.01.00'
 
 
 def parse_arguments(sys_argv=sys.argv):
@@ -131,7 +131,7 @@ def validate_args(args=None):
     """
     try:
         username = os.getenv('USER', 'unprivileged user')
-        if username is not 'root' and not args.test:
+        if username != 'root' and not args.test:
             msg = 'Superuser needed, current user is ' + format(username)
             msg += '\n\tFor unprivileged users, try hidden option --test'
             return 1, msg
@@ -218,7 +218,7 @@ class Ops(object):
         self._standard_loop_starttime = time.time()
         self._standard_loop_runtime = None
         self._standard_loop_count = 0
-        self.maxtime = self.args.duration * 60  # convert minutes to seconds
+        self._standard_loop_maxtime = self.args.duration * 60  # convert minutes to seconds
         self.recent_events = {}
 
     def __enter__(self):
@@ -254,7 +254,7 @@ class Ops(object):
         """
         # Format the new cronjob to run at the requested rate and touch the requested file
         crontab_newjob = '*/{} * * * * touch {}'.format(self.args.frequency, self.args.touch)
-        self.log.debug('new crontab job: "{}"'.format(crontab_newjob))
+        self.log.info('new crontab job "{}"'.format(crontab_newjob))
         crontab_alljobs = (self._crontab_runtime + '\n' + crontab_newjob).strip()
 
         # Do not add the new cronjob again, that would be silly
@@ -333,7 +333,7 @@ class Ops(object):
         self._crontab_backup = self._cron_runtime()
         stdoutjson = json.dumps(self._crontab_backup.strip().split('\n'), indent=4)
         self.log.debug('self._crontab_backup...\n' + stdoutjson)
-        self.log.debug('crontab jobs backed up')
+        self.log.info('crontab jobs backed up')
         if self.args.backup is not None:
             try:
                 with open(self.args.backup, 'wt') as filehandle:
@@ -348,6 +348,7 @@ class Ops(object):
         :return: None
         """
         pause_seconds = self.args.frequency * 60
+        self.log.info('pausing loop {} min'.format(str(self.args.frequency)))
         time.sleep(pause_seconds)
 
     def standard_loop(self):
@@ -375,9 +376,11 @@ class Ops(object):
         """
         self._standard_loop_runtime = time.time() - self._standard_loop_starttime
         self.log.debug('runtime = {}'.format(self._standard_loop_runtime))
-        self.log.debug('maxtime = {}'.format(self.maxtime))
-        if self._standard_loop_runtime >= self.maxtime:
-            self.log.debug('overrun = {}'.format(self._standard_loop_runtime - self.maxtime))
+        self.log.debug('maxtime = {}'.format(self._standard_loop_maxtime))
+        if self._standard_loop_runtime >= self._standard_loop_maxtime:
+            self.log.debug('overrun = {}'.format(self._standard_loop_runtime
+                                                 - self._standard_loop_maxtime))
+            self.log.info('loop competed')
             return True
         return False
 
@@ -395,7 +398,7 @@ class Ops(object):
             self.rotate_touchfile()
             self._pause_loop()
         except KeyboardInterrupt:
-            self.log.warning('Loop terminated by interrupt signal')
+            self.log.warning('loop terminated by request')
             exit(0)
 
     def update_touchfile(self):
@@ -428,6 +431,7 @@ class Ops(object):
             try:
                 with open(self.args.touch, 'at') as filehandle:
                     filehandle.write(touch_append.strip() + '\n')
+                self.log.info('cron event information appended to touch file')
             except Exception as err:
                 self.log.error(err, exc_info=True)
                 exit(1)
@@ -466,6 +470,7 @@ class Ops(object):
                         cron_events.append(line.strip())
                     else:
                         break
+            self.log.info('parsed cron event information')
             msg = 'Checked ' + self.args.logfile
             msg += ' at ' + start.isoformat()
             msg += ', found ' + str(touch_count)
@@ -494,7 +499,12 @@ class Ops(object):
             except Exception as err:
                 self.log.error(err, exc_info=True)
                 exit(1)
+            self.log.info('rotated touch file')
+            msg = 'rotated out "{}", renamed as'.format(self.args.touch)
+            msg += '"{}"'.format(rotate_filename)
+            self.log.debug(msg)
         else:
+            self.log.info('touch file not rotated')
             msg = 'Insufficient loops to rotate touch file, need +/- '
             msg += str(remaining_loops) + ' more to reach '
             msg += str(rotate_interval)
@@ -502,7 +512,7 @@ class Ops(object):
 
 
 if __name__ == '__main__':
-    LOGGER = setup_logger(level=logging.DEBUG)
+    LOGGER = setup_logger(level=logging.INFO)
     ARGS = parse_arguments(sys_argv=sys.argv)
     with Ops(ARGS, LOGGER) as OPS:
         OPS.new_cronjob()
