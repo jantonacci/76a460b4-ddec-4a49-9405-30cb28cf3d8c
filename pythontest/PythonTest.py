@@ -23,7 +23,7 @@ __version__ = '0.01.00'
 
 def parse_arguments(sys_argv=sys.argv):
     """
-    Interpret command line arguments per "docs/SQD Script Test v1.1.txt"
+    Interpret command line arguments per README.md
     section (1.a), help text, and their suggested defaults.
     :param sys_argv: the command line arguments from the shell
     :ptype sys_argv: list 
@@ -31,7 +31,7 @@ def parse_arguments(sys_argv=sys.argv):
     :rtype: argparse.ArgumentParser.parse_known_args()[0]
     """
     parser = argparse.ArgumentParser(version=__version__)
-    # "docs/SQD Script Test v1.1.txt" section (1.a.i)
+    # README.md section (1.a.i)
     default = os.path.join(os.getenv('HOME', '.'), 'touchfile.txt')
     help = "Specify a file location and name (default: {})".format(default)
     parser.add_argument('-f', '--file',
@@ -41,7 +41,7 @@ def parse_arguments(sys_argv=sys.argv):
                         metavar='FILENAME',
                         action='store',
                         default=default)
-    # "docs/SQD Script Test v1.1.txt" section (1.a.ii)
+    # README.md section (1.a.ii)
     default = 2
     help = "Specify how often (touch rate) cron will touch the file "
     help += "specified on the input (default: every "
@@ -53,7 +53,7 @@ def parse_arguments(sys_argv=sys.argv):
                         action='store',
                         default=default,
                         type=int)
-    # "docs/SQD Script Test v1.1.txt" section (1.a.iii)
+    # README.md section (1.a.iii)
     default = os.path.join(os.getenv('HOME', '.'), 'rotate', 'pythontest')
     help = 'Specify a new log roll over file location and prefix, '
     help += '(default: {})'.format(default)
@@ -63,7 +63,7 @@ def parse_arguments(sys_argv=sys.argv):
                         metavar='FILEPREFIX',
                         action='store',
                         default=default)
-    # "docs/SQD Script Test v1.1.txt" section (1.a.iv)
+    # README.md section (1.a.iv)
     default = 0
     help = 'Specify how long the script will run (default: '
     help += '{} minutes for forever, must handle user '.format(default)
@@ -75,14 +75,14 @@ def parse_arguments(sys_argv=sys.argv):
                         action='store',
                         default=default,
                         type=int)
-    # "docs/SQD Script Test v1.1.txt" section (1.c)
+    # README.md section (1.c)
     default = '/var/log/syslog'
     parser.add_argument('-c', '--cron-log',
                         dest='logfile',
                         help=argparse.SUPPRESS,
                         action='store',
                         default=default)
-    # "docs/SQD Script Test v1.1.txt" section (1.b) specifies "system crontab" (root)
+    # README.md section (1.b) specifies "system crontab" (root)
     # this hidden option can be used to override that requirement for testing
     parser.add_argument('--test',
                         help=argparse.SUPPRESS,
@@ -122,7 +122,7 @@ def validate_args(args=None):
       --test: false unless --test present
       --cron-log: write permission on existing file name required
       --backup: hidden, disabled - but backs up the current crontab
-      Also: Per "docs/SQD Script Test v1.1.txt" section (1.b),
+      Also: Per README.md section (1.b),
         the SYSTEM crontab is to be used, not the USER's
     :param args: command line arguments namespace
     :ptype args: parser.parse_known_args object
@@ -194,7 +194,7 @@ def setup_logger(level=logging.ERROR):
 
 class Ops(object):
     """
-    Interpret operations per "docs/SQD Script Test v1.1.txt"
+    Interpret operations per README.md
     sections 1.b through 1.f, as a class:
         1.b. Modify the system (root) crontab to touch a file
         1.c. Process cron events in logs and update touched file
@@ -354,7 +354,7 @@ class Ops(object):
     def standard_loop(self):
         """
         Handle loop variations based on self.args.duration per
-         "docs/SQD Script Test v1.1.txt" section (1.a.iv.)
+         README.md section (1.a.iv.)
         :return: None
         """
         if self.args.duration == 0:
@@ -370,7 +370,7 @@ class Ops(object):
     def _exceeded_duration(self):
         """
         Handle loop variations based on self.args.duration per
-         "docs/SQD Script Test v1.1.txt" section (1.a.iv.) for
+         README.md section (1.a.iv.) for
           non-zero values in self.args.duration
         :return: None
         """
@@ -386,7 +386,7 @@ class Ops(object):
 
     def _try_one_exec(self):
         """
-        Aggregate the various tasks in "docs/SQD Script Test v1.1.txt"
+        Aggregate the various tasks in README.md
         sections (b. to f.) and handle interrupt signals as successful exits
         :return: exit code
         :rtype : int
@@ -403,7 +403,7 @@ class Ops(object):
 
     def update_touchfile(self):
         """
-        Per "docs/SQD Script Test v1.1.txt" section (c.) update
+        Per README.md section (c.) update
         the touch file with parsed logfile information
         :return: None
         """
@@ -440,7 +440,7 @@ class Ops(object):
 
     def parse_logfile(self):
         """
-        Per "docs/SQD Script Test v1.1.txt" section (c.) read the 
+        Per README.md section (c.) read the 
         the cron logfile and store events within the accepted time
         window (last 7 minutes)
         :return: log file review results from last 7 minutes
@@ -486,7 +486,7 @@ class Ops(object):
 
     def rotate_touchfile(self):
         """
-        Per "docs/SQD Script Test v1.1.txt" section (d.) rotate
+        Per README.md section (d.) rotate
         the touch file, renaming based on self.args.prefix
         :return: None
         """
