@@ -5,7 +5,7 @@ Purpose: On the [REDACTED] team it’s important to be able to understand, modif
 What you’ll need: A Linux OS with Python 2.7 or higher installed.
 
 Expectations: Use any and all resources, just like you would if you were solving the problem for work. We expect to be able to run the script here at [REDACTED] and see your code working. We will also review how you think about the assignment, structure your work and how you communicate/document it. If you are not able to address a requirement please document why. The assignment is to write a Python script that will make system calls and process log files in a way that is similar to what the team writes in their automation today.
-
+```
 1. The Python script you will write will address the following requirements
     a. User input for your script:
         i. Specify a file location and name (example: /root/touchfile.txt)
@@ -23,3 +23,4 @@ Expectations: Use any and all resources, just like you would if you were solving
         i. success
         ii. error
         iii. user interrupt ( example: CTRL-C )
+```
